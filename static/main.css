@@ -1,0 +1,43 @@
+
+* {
+	margin:0;
+	padding:0;
+}
+
+html,body{
+	position: relative;
+	overflow: hidden;
+	max-height: 100%;
+	height: 100%;
+	width: 100%;
+}
+
+.panel-upload {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	z-index: 999;
+}
+
+.name {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	width: 100%;
+	height: 80px;
+	-webkit-transform: translateY( -50% );
+	transform: translateY( -50% );
+	text-align: center;
+	font: normal 80px Arial;
+	color: #fff;
+}
+
+.name-letter {
+	position: relative;
+	display: inline-block;
+	letter-spacing: 2px;
+}
+
+.name-space {
+	width: 24px;
+}
