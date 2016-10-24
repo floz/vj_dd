@@ -9,6 +9,7 @@ const fs = replaceIncludes( require( "./shaders/ShapeElement.fs" ) )
 const geometries = require( "dd/core/geometries" )
 const textures = require( "dd/core/textures" )
 const colors = require( "dd/core/colors" )
+const config = require( "dd/core/config" )
 const ElementMaterial = require( "./ElementMaterial" )
 
 class CircleElement extends THREE.Mesh {
@@ -35,7 +36,7 @@ class CircleElement extends THREE.Mesh {
   init( x, y, z, r, c ) {
     this.position.x = x
     this.position.y = y
-    this.position.z = z * 5.5
+    this.position.z = z * config.zStep
     this.scale.set( r, r, .1 )
     // this.renderOrder = z
   }

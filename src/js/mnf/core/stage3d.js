@@ -32,22 +32,24 @@ class Stage3d{
 		// this.scene.background = new THREE.Color( 0xffffff );
 
 		// orthographic scene for buffer
-		this.scene2 = new THREE.Scene()
-		this.orthoCamera = new THREE.OrthographicCamera( - 0.5, 0.5, 0.5, - 0.5, 0, 1 )
-		this.mesh =  new THREE.Mesh( new THREE.PlaneBufferGeometry( 1, 1 ), new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:this.clearAlpha}) )
-		this.scene2.add( this.mesh )
+		// this.scene2 = new THREE.Scene()
+		// this.orthoCamera = new THREE.OrthographicCamera( - 0.5, 0.5, 0.5, - 0.5, 0, 1 )
+		// this.mesh =  new THREE.Mesh( new THREE.PlaneBufferGeometry( 1, 1 ), new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:this.clearAlpha}) )
+		// this.scene2.add( this.mesh )
 
 		const attributes = { alpha:true, antialias:true, preserveDrawingBuffer:true, backgroundColor: 0xffffff }
 
 		const o = {}
 		o.backgroundColor = 0x021b37
 
-		this.scene.fog = new THREE.Fog( o.backgroundColor, 0, 10000 )
+		this.scene.fog = new THREE.Fog( o.backgroundColor, 0, 5000 )
+		this.scene.fog.color = new THREE.Color( o.backgroundColor )
 
 		const dStage = gui.addFolder( "Stage3D" )
 		dStage.addColor( o, "backgroundColor" ).onChange( () => {
 			this.renderer.setClearColor( o.backgroundColor, this.clearAlpha )
-			this.scene.fog.color = new THREE.Color( o.backgroundColor )
+			const c = new THREE.Color( o.backgroundColor )
+			this.scene.fog.color.setRGB( c.r, c.g, c.b )
 		} )
 		dStage.add( this.scene.fog, "near", -1000, 0 )
 		dStage.add( this.scene.fog, "far", 0, 10000 )
@@ -96,7 +98,7 @@ class Stage3d{
 	render = (dt)=> {
 		this.renderer.autoClearColor = this.clearAuto
 		this.renderer.autoClear = this.clearAuto
-		this.mesh.material.opacity = this.clearAlpha
+		// this.mesh.material.opacity = this.clearAlpha
 
 		if(this.control){
 			this.control.update(dt)

@@ -6,10 +6,13 @@ const vs = prefixVS + replaceIncludes( require( "./shaders/BasicElement.vs" ) )
 const vsDepth = replaceIncludes( require( "./shaders/BasicElementDepth.vs" ) )
 const fs = replaceIncludes( require( "./shaders/BasicElement.fs" ) )
 
+const stage3d = require( "mnf/core/stage3d" )
+
 class ElementMaterial extends THREE.ShaderMaterial {
 
   constructor( { color = new Color( 0xff00ff ), vertexShader = vs, vertexShaderDepth = vsDepth, fragmentShader = fs, uniforms = {}, transparent = false } = {} ) {
     uniforms.color = { type: "c", value: color }
+    uniforms.bgColor = { type: "c", value: stage3d.scene.fog.color }
 
     super( {
       uniforms: uniforms,

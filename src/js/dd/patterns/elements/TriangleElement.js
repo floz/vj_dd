@@ -6,6 +6,7 @@ const vs = prefixVS + replaceIncludes( require( "./shaders/ShapeElement.vs" ) )
 const vsDepth = replaceIncludes( require( "./shaders/ShapeElementDepth.vs" ) )
 const fs = replaceIncludes( require( "./shaders/ShapeElement.fs" ) )
 
+const config = require( "dd/core/config" )
 const geometries = require( "dd/core/geometries" )
 const colors = require( "dd/core/colors" )
 const textures = require( "dd/core/textures" )
@@ -35,7 +36,7 @@ class TriangleElement extends THREE.Mesh {
   init( x, y, z, w, h, c ) {
     this.position.x = x
     this.position.y = y
-    this.position.z = z * 5.5
+    this.position.z = z * config.zStep
     this.scale.set( w, h, .1 )
     // this.renderOrder = z
   }
