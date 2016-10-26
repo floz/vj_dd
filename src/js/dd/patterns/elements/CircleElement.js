@@ -11,10 +11,11 @@ const textures = require( "dd/core/textures" )
 const colors = require( "dd/core/colors" )
 const config = require( "dd/core/config" )
 const ElementMaterial = require( "./ElementMaterial" )
+const BaseElement = require( "./BaseElement" )
 
-class CircleElement extends THREE.Mesh {
+class CircleElement extends BaseElement {
 
-  constructor() {
+  constructor( style ) {
     const mat = new ElementMaterial( {
       color: colors.get(),
       vertexShader: vs,
@@ -25,20 +26,23 @@ class CircleElement extends THREE.Mesh {
         tShape: { type: "t", value: textures.circle }
       }
     } )
-    // mat.depthWrite = false,
 
-    super( geometries.plane, mat )
+    super( style, geometries.plane, mat )
 
     this.castShadow = true
     this.customDepthMaterial = mat.depthMaterial
   }
 
   init( x, y, z, r, c ) {
+    this.x = x
+    this.y = y
+    this.z = z
+    this.r = r
+
     this.position.x = x
     this.position.y = y
     this.position.z = z * config.zStep
     this.scale.set( r, r, .1 )
-    // this.renderOrder = z
   }
 
 }

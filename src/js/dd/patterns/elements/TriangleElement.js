@@ -11,10 +11,11 @@ const geometries = require( "dd/core/geometries" )
 const colors = require( "dd/core/colors" )
 const textures = require( "dd/core/textures" )
 const ElementMaterial = require( "./ElementMaterial" )
+const BaseElement = require( "./BaseElement" )
 
-class TriangleElement extends THREE.Mesh {
+class TriangleElement extends BaseElement {
 
-  constructor() {
+  constructor( style ) {
     const mat = new ElementMaterial( {
       color: colors.get(),
       vertexShader: vs,
@@ -25,20 +26,24 @@ class TriangleElement extends THREE.Mesh {
         tShape: { type: "t", value: textures.triangle }
       }
     } )
-    // mat.depthWrite = false
 
-    super( geometries.plane, mat )
+    super( style, geometries.plane, mat )
 
     this.castShadow = true
     this.customDepthMaterial = mat.depthMaterial
   }
 
   init( x, y, z, w, h, c ) {
+    this.x = x
+    this.y = y
+    this.z = z
+    this.w = w
+    this.h = h
+
     this.position.x = x
     this.position.y = y
     this.position.z = z * config.zStep
     this.scale.set( w, h, .1 )
-    // this.renderOrder = z
   }
 
 }

@@ -5,10 +5,12 @@
 
 uniform vec3 color;
 uniform vec3 bgColor;
+uniform float opacity;
 
 void main() {
 
-  gl_FragColor = vec4( color + color * bgColor * .4, 1.0 );
+  if( opacity == 0. ) discard;
+  gl_FragColor = vec4( color + color * bgColor * .4, opacity );
 
   #include <clipping_planes_fragment>
 	#include <logdepthbuf_fragment>

@@ -8,7 +8,8 @@ const StyleTriangle = require( "./StyleTriangle" )
 class StyleFactory {
 
   constructor() {
-
+    this.divideDefX = 2
+    this.divideDefY = 2
   }
 
   getStyle( subdivisionCount ) {
@@ -59,7 +60,17 @@ class StyleFactory {
 
   get( cnt, x, y, w, h, subdivisionFactor, subdivisionCount ) {
     const c = this.getStyle( subdivisionCount )
-    return new c( cnt, x, y, w, h, subdivisionFactor, subdivisionCount )
+    const style = new c( cnt, x, y, w, h, subdivisionFactor, subdivisionCount )
+    if( c == Style4 ) {
+      style.divideDefX = this.divideDefX
+      style.divideDefY = this.divideDefY
+    }
+    return style
+  }
+
+  setDivideDefinition( x, y ) {
+    this.divideDefX = x
+    this.divideDefY = y
   }
 
 }

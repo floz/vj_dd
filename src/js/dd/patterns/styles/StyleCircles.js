@@ -14,7 +14,7 @@ class StyleCircles extends BaseStyle {
     const element = new SquareElement()
     element.init( this.x, this.y, this.subdivisionCount, this.w, this.h, this.getColor() )
     this.cnt.add( element )
-    // this.elements.push( element )
+    this.elements.push( element )
 
     this.generateCircles()
   }
@@ -69,7 +69,7 @@ class StyleCircles extends BaseStyle {
       let element = new CircleElement()
       element.init( x, y, this.subdivisionCount + .5, rCircle, this.getColor() )
       this.cnt.add( element )
-      // this.elements.push( element )
+      this.elements.push( element )
     }
   }
 

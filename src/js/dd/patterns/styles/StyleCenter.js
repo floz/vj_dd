@@ -29,7 +29,6 @@ class StyleCenter extends BaseStyle {
     const h = this.h * centerRatio
     const x = this.x
     const y = this.y
-    console.log( x, y, w, h )
     this.zone = new PatternGenerator( this.cnt, x, y, w, h, this.subdivisionFactor * .95, this.subdivisionCount )
   }
 

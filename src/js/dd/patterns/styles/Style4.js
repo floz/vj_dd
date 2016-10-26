@@ -16,9 +16,12 @@ class Style4 extends BaseStyle {
     const lum = 50
     const col = "hsl( " + hue + ", " + sat + "%, " + lum + "% )"
 
-    this.element = new SquareElement()
+    this.element = new SquareElement( this )
     this.element.init( x, y, this.subdivisionCount, w, h, col )
     this.cnt.add( this.element )
+
+    this.divideDefX = 2
+    this.divideDefY = 2
   }
 
   subdivide() {
@@ -26,21 +29,29 @@ class Style4 extends BaseStyle {
 
     const PatternGenerator = require( "../PatternGenerator" )
 
-    let stepsx = 2
-    let stepsy = 2
-    let px = this.x - this.w * .25
-    let py = this.y - this.h * .25
-    let dx = this.w / stepsx
-    let dy = this.h / stepsy
-    for( let x = 0, xmax = stepsx; x < xmax; x++ ) {
-      for( let y = 0, ymax = stepsy; y < ymax; y++ ) {
+    let decalX = 0
+    if( this.divideDefX > 1 ) {
+      decalX = this.w * ( .5 / this.divideDefX )
+    }
+    let decalY = 0
+    if( this.divideDefY > 1 ) {
+      decalY = this.h * ( .5 / this.divideDefY )
+    }
+    // let stepsx = 2
+    // let stepsy = 2
+    let px = this.x - decalX
+    let py = this.y - decalY
+    let dx = this.w / this.divideDefX
+    let dy = this.h / this.divideDefY
+    for( let x = 0, xmax = this.divideDefX; x < xmax; x++ ) {
+      for( let y = 0, ymax = this.divideDefY; y < ymax; y++ ) {
         let zone = new PatternGenerator( this.cnt, px, py, dx, dy, this.subdivisionFactor * .875, this.subdivisionCount )
         this.zones.push( zone )
 
         py += dy
       }
       px += dx
-      py = this.y - this.h * .25
+      py = this.y - decalY
     }
   }
 

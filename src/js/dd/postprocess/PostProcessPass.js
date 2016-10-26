@@ -25,7 +25,7 @@ class PostProcessPass extends WAGNER.Pass {
 		f.add( this.params, "gamma", 0, 10, .1 )
 		f.add( this.params, "contrast", 0, 3, .1 )
 		f.add( this.params, "brightness", 0, 1, .1 )
-		f.open()
+		// f.open()
 	}
 
 	run( c ) {
