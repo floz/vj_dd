@@ -10,14 +10,19 @@ uniform float brightness;
 uniform float mirrorX;
 uniform float mirrorY;
 // uniform float MirrorRadial;
+uniform float angle;
 uniform float divide4;
 uniform float vignetteFallOff;
 uniform float vignetteAmount;
 uniform float invertRatio;
+uniform float sectionsKaleid;
+uniform float kaleidActivated;
 
 uniform float amount;
 uniform float speed;
 uniform float time;
+
+const float TAU = 2. * PI;
 
 highp float rand( const in vec2 uv ) {
 	const highp float a = 12.9898, b = 78.233, c = 43758.5453;
@@ -34,7 +39,28 @@ void main() {
 	if(mirrorX>0.){ uv.x = abs(uv.x-.5)+.5; }
 	if(mirrorY>0.){ uv.y = abs(uv.y-.5)+.5; }
 
-	vec4 color = texture2D(tInput, uv);
+	float sin_factor = sin(angle);
+  float cos_factor = cos(angle);
+  vec2 origin = vec2(0.5 ,0.5);
+
+  vec2 temp = (uv - origin);
+
+  temp = temp * mat2(cos_factor, sin_factor, -sin_factor, cos_factor);
+
+  uv = (temp + origin);
+
+	vec2 pos = vec2( uv - .5 );
+
+	float rad = length(pos);
+  float a = atan(pos.y, pos.x);
+
+  float ma = mod(a, TAU/sectionsKaleid);
+  ma = abs(ma - PI/sectionsKaleid);
+
+  float x = cos(ma) * rad;
+  float y = sin(ma) * rad;
+
+	vec4 color = texture2D(tInput, vec2( x, y ) ) * kaleidActivated + texture2D(tInput, uv ) * ( 1. - kaleidActivated );
 
   // rgb modifs
 	vec3 rgb = toGamma( color.rgb );
