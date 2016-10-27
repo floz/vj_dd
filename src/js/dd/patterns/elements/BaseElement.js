@@ -1,8 +1,10 @@
+const colors = require( "dd/core/colors" )
+const timeout = require( "mnf/utils/timeout" )
+
 class BaseElement extends THREE.Mesh {
 
-  constructor( style, geo, mat ) {
+  constructor( geo, mat ) {
     super( geo, mat )
-    this.style = style
 
     this.isShown = false
   }
@@ -39,12 +41,6 @@ class BaseElement extends THREE.Mesh {
     }
   }
 
-  regenerate( zStop ) {
-    if( this.z >= zStop ) {
-      this.style.regenerate()
-    }
-  }
-
   disableShadows() {
     this.castShadow = false
     this.customDepthMaterial = null
@@ -52,6 +48,41 @@ class BaseElement extends THREE.Mesh {
 
   clean() {
     this.parent.remove( this )
+
+    TweenLite.killTweensOf( this.material.uniforms.opacity )
+    TweenLite.killTweensOf( this.scale )
+
+    if( this.tiMat ) {
+      timeout.clear( this.tiMat )
+    }
+    if( this.tiBg ) {
+      timeout.clear( this.tiBg )
+    }
+  }
+
+  refreshColors() {
+    const colorMat = colors.get()
+
+    if( this.tiMat ) {
+      timeout.clear( this.tiMat )
+    }
+    this.tiMat = timeout( () => {
+      const z = ( ( this.z - 1 ) ) * this.zStep
+      this.position.z = z + 50 + Math.random() * 50
+      TweenLite.to( this.position, .25, {
+        z: z,
+        ease: Cubic.easeOut
+      } )
+      this.material.uniforms.color.value = colorMat
+    }, 250 * ( 1. - ( this.z - 1 ) / 8 ) )
+
+    const colorBg = colors.getFog()
+    if( this.tiBg ) {
+      timeout.clear( this.tiBg )
+    }
+    this.tiBg = timeout( () => {
+      this.material.uniforms.bgColor.value = colorBg
+    }, 250 * ( 1. - ( this.z - 1 ) / 8 ) )
   }
 
 }

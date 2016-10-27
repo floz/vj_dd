@@ -92,6 +92,25 @@ class BaseStyle {
     }
   }
 
+  refreshColors() {
+    if( this.element ) {
+      this.element.refreshColors()
+    }
+    if( this.elements ) {
+      for( let i = 0, n = this.elements.length; i < n; i++ ) {
+        this.elements[ i ].refreshColors()
+      }
+    }
+    if( this.zone ) {
+      this.zone.refreshColors()
+    }
+    if( this.zones ) {
+      for( let i = 0, n = this.zones.length; i < n; i++ ) {
+        this.zones[ i ].refreshColors()
+      }
+    }
+  }
+
 }
 
 module.exports = BaseStyle

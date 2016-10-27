@@ -15,7 +15,7 @@ const BaseElement = require( "./BaseElement" )
 
 class CircleElement extends BaseElement {
 
-  constructor( style ) {
+  constructor() {
     const mat = new ElementMaterial( {
       color: colors.get(),
       vertexShader: vs,
@@ -27,7 +27,7 @@ class CircleElement extends BaseElement {
       }
     } )
 
-    super( style, geometries.plane, mat )
+    super( geometries.plane, mat )
 
     this.castShadow = true
     this.customDepthMaterial = mat.depthMaterial
@@ -43,6 +43,15 @@ class CircleElement extends BaseElement {
     this.position.y = y
     this.position.z = z * config.zStep
     this.scale.set( r, r, .1 )
+  }
+
+  clean() {
+    super.clean()
+
+    if( !this.pool ) {
+      this.pool = require( "./elementsPools" )
+    }
+    this.pool.circle.release( this )
   }
 
 }

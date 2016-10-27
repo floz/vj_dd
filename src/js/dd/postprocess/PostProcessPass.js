@@ -1,4 +1,5 @@
 const gui = require( "mnf/utils/gui" )
+const textures = require( "dd/core/textures" )
 
 class PostProcessPass extends WAGNER.Pass {
 
@@ -7,6 +8,9 @@ class PostProcessPass extends WAGNER.Pass {
 
 		this.shader = WAGNER.processShader( WAGNER.basicVs, require( "./shaders/postprocess.fs" ) )
 		this.mapUniforms( this.shader.uniforms )
+
+		this.shader.uniforms.tInput.value.wrapS = THREE.RepeatWrapping
+		this.shader.uniforms.tInput.value.wrapT = THREE.RepeatWrapping
 
 		this.params.gamma = .85
 		this.params.contrast = 1.15
@@ -23,6 +27,11 @@ class PostProcessPass extends WAGNER.Pass {
 		this.params.time = 0;
 		this.params.sectionsKaleid = 0;
 		this.params.kaleidActivated = 0;
+		this.params.tNoise = textures.noise;
+		this.params.glitchOffsetX = 2.
+		this.params.glitchOffsetY = 2.
+		// this.params.glitchRatio = .99
+		this.params.glitchRatio = 0
 
 		const f = gui.addFolder( "PostProcess" )
 		f.add( this.params, "gamma", 0, 10, .1 )
@@ -30,6 +39,9 @@ class PostProcessPass extends WAGNER.Pass {
 		f.add( this.params, "brightness", 0, 1, .1 )
 		f.add( this.params, "angle", -Math.PI, Math.PI, .01 )
 		f.add( this.params, "sectionsKaleid", 0, 10, 1 )
+		f.add( this.params, "glitchOffsetX", 0, 10, 1 )
+		f.add( this.params, "glitchOffsetY", 0, 10, 1 )
+		f.add( this.params, "glitchRatio", 0, 2, .01 )
 		f.add( this.params, "divide4" )
 		f.add( this.params, "mirrorX" )
 		f.add( this.params, "mirrorY" )
@@ -37,6 +49,9 @@ class PostProcessPass extends WAGNER.Pass {
 	}
 
 	run( c ) {
+		this.shader.uniforms.glitchOffsetX.value = this.params.glitchOffsetX
+		this.shader.uniforms.glitchOffsetY.value = this.params.glitchOffsetY
+		this.shader.uniforms.glitchRatio.value = this.params.glitchRatio
 		this.shader.uniforms.gamma.value = this.params.gamma
 		this.shader.uniforms.contrast.value = this.params.contrast
 		this.shader.uniforms.brightness.value = this.params.brightness

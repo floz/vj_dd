@@ -6,12 +6,12 @@ const BaseElement = require( "./BaseElement" )
 
 class SquareElement extends BaseElement {
 
-  constructor( style ) {
+  constructor() {
     const mat = new ElementMaterial( {
       color: colors.get()
     } )
 
-    super( style, geometries.cube, mat )
+    super( geometries.cube, mat )
 
     this.castShadow = true
     this.customDepthMaterial = mat.depthMaterial
@@ -47,6 +47,17 @@ class SquareElement extends BaseElement {
   disableShadows() {
     this.castShadow = false
     this.customDepthMaterial = null
+  }
+
+  clean() {
+    super.clean()
+
+    TweenLite.killTweensOf( this.position )
+
+    if( !this.pool ) {
+      this.pool = require( "./elementsPools" )
+    }
+    this.pool.square.release( this )
   }
 
 }

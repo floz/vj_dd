@@ -61,6 +61,10 @@ class PatternGenerator {
     return this.style.getElements()
   }
 
+  refreshColors() {
+    this.style.refreshColors()
+  }
+
 }
 
 module.exports = PatternGenerator

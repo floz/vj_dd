@@ -1,5 +1,6 @@
 const BaseStyle = require( "./BaseStyle" )
 const TriangleElement = require( "../elements/TriangleElement" )
+const elementsPools = require( "../elements/elementsPools" )
 
 class StyleTriangle extends BaseStyle {
 
@@ -13,7 +14,7 @@ class StyleTriangle extends BaseStyle {
 
   generate() {
     const s = Math.random() < .5 ? "a" : "b"
-    this.element = new TriangleElement()
+    this.element = elementsPools.triangle.get()
     this.element.init( this.x, this.y, this.subdivisionCount, this.w, this.h, this.getColor(), this.getColor(), s )
     const radRotate = Math.random() * 4 >> 0
     this.element.rotation.z = Math.PI * .5 * radRotate

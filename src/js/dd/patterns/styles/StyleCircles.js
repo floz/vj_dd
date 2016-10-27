@@ -1,7 +1,8 @@
 const BaseStyle = require( "./BaseStyle" )
 const PatternConfig = require( "../PatternConfig" )
-const CircleElement = require( "../elements/CircleElement" )
-const SquareElement = require( "../elements/SquareElement" )
+// const CircleElement = require( "../elements/CircleElement" )
+// const SquareElement = require( "../elements/SquareElement" )
+const elementsPools = require( "../elements/elementsPools" )
 
 class StyleCircles extends BaseStyle {
 
@@ -11,7 +12,7 @@ class StyleCircles extends BaseStyle {
     this.canSubdivide = false
 
     this.elements = []
-    const element = new SquareElement()
+    const element = elementsPools.square.get()
     element.init( this.x, this.y, this.subdivisionCount, this.w, this.h, this.getColor() )
     this.cnt.add( element )
     this.elements.push( element )
@@ -66,7 +67,7 @@ class StyleCircles extends BaseStyle {
         y += radius * Math.sin( rad )
       }
 
-      let element = new CircleElement()
+      let element = elementsPools.circle.get()
       element.init( x, y, this.subdivisionCount + .5, rCircle, this.getColor() )
       this.cnt.add( element )
       this.elements.push( element )

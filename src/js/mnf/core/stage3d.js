@@ -39,21 +39,21 @@ class Stage3d{
 
 		const attributes = { alpha:true, antialias:true, preserveDrawingBuffer:true, backgroundColor: 0xffffff }
 
-		const o = {}
-		o.backgroundColor = 0x021b37
+		// const o = {}
+		// o.backgroundColor = 0x021b37
 
-		this.scene.fog = new THREE.Fog( o.backgroundColor, 0, 5000 )
-		this.scene.fog.color = new THREE.Color( o.backgroundColor )
+		this.scene.fog = new THREE.Fog( 0xff00ff, 0, 5000 )
+		// this.scene.fog.color = new THREE.Color( 0xff00ff )
 
-		const dStage = gui.addFolder( "Stage3D" )
-		dStage.addColor( o, "backgroundColor" ).onChange( () => {
-			this.renderer.setClearColor( o.backgroundColor, this.clearAlpha )
-			const c = new THREE.Color( o.backgroundColor )
-			this.scene.fog.color.setRGB( c.r, c.g, c.b )
-		} )
-		dStage.add( this.scene.fog, "near", -1000, 0 )
-		dStage.add( this.scene.fog, "far", 0, 10000 )
-		dStage.open()
+		// const dStage = gui.addFolder( "Stage3D" )
+		// dStage.addColor( o, "backgroundColor" ).onChange( () => {
+		// 	this.renderer.setClearColor( o.backgroundColor, this.clearAlpha )
+		// 	const c = new THREE.Color( o.backgroundColor )
+		// 	this.scene.fog.color.setRGB( c.r, c.g, c.b )
+		// } )
+		// dStage.add( this.scene.fog, "near", -1000, 0 )
+		// dStage.add( this.scene.fog, "far", 0, 10000 )
+		// dStage.open()
 
 		// yolo
 		this.renderer = new THREE.WebGLRenderer( attributes )
@@ -62,7 +62,7 @@ class Stage3d{
 		// this.renderer.preserveDrawingBuffer = true
 		this.renderer.domElement.className = 'three'
 		this.renderer.setSize( this.w, this.h )
-		this.renderer.setClearColor( o.backgroundColor, this.clearAlpha )
+		this.renderer.setClearColor( 0xff00ff, this.clearAlpha )
 		this.renderer.shadowMap.enabled = true
 		this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
 

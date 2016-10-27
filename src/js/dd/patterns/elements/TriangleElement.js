@@ -15,7 +15,7 @@ const BaseElement = require( "./BaseElement" )
 
 class TriangleElement extends BaseElement {
 
-  constructor( style ) {
+  constructor() {
     const mat = new ElementMaterial( {
       color: colors.get(),
       vertexShader: vs,
@@ -27,7 +27,7 @@ class TriangleElement extends BaseElement {
       }
     } )
 
-    super( style, geometries.plane, mat )
+    super( geometries.plane, mat )
 
     this.castShadow = true
     this.customDepthMaterial = mat.depthMaterial
@@ -44,6 +44,15 @@ class TriangleElement extends BaseElement {
     this.position.y = y
     this.position.z = z * config.zStep
     this.scale.set( w, h, .1 )
+  }
+
+  clean() {
+    super.clean()
+
+    if( !this.pool ) {
+      this.pool = require( "./elementsPools" )
+    }
+    this.pool.triangle.release( this )
   }
 
 }

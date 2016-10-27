@@ -32,9 +32,9 @@ class Main {
 		}
 
 		const fCamera = gui.addFolder( "Camera" )
-		fCamera.add( stage3d.camera, "fov", 10, 120, 1 ).listen().onChange( () => {
-			stage3d.camera.updateProjectionMatrix()
-		} )
+		// fCamera.add( stage3d.camera.position, "x", -100, 100 )
+		// fCamera.add( stage3d.camera.position, "y", -100, 100 )
+		// fCamera.add( stage3d.camera.position, "z", -100, 100 )
 		fCamera.add( stage3d.control, "radius", 0, 10000, 1 ).onChange( () => {
 			stage3d.control.__radius = stage3d.control.radius
 		})

@@ -21,13 +21,13 @@ class Pattern extends THREE.Group {
 
     this.zStopToRefresh = 4
 
-    const f = gui.addFolder( this.name )
-    f.add( this, "zStep", 1, 100 ).onChange( this.refreshZStep )
-    f.add( this, "zStopToRefresh", 0, 7, 1 )
-    f.add( this, "show" )
-    f.add( this, "flip" )
-    f.add( this, "regenerate" )
-    f.open()
+    // const f = gui.addFolder( this.name )
+    // f.add( this, "zStep", 1, 100 ).onChange( this.refreshZStep )
+    // f.add( this, "zStopToRefresh", 0, 7, 1 )
+    // f.add( this, "show" )
+    // f.add( this, "flip" )
+    // f.add( this, "regenerate" )
+    // f.open()
 
     IDX++
   }
@@ -37,6 +37,14 @@ class Pattern extends THREE.Group {
     this.flipCount++
     TweenLite.to( this.rotation, .6, {
       z: this.flipCount * Math.PI,
+      ease: Cubic.easeOut
+    })
+  }
+
+  flip2() {
+    this.flipCount++
+    TweenLite.to( this.rotation, .6, {
+      z: ( this.flipCount % 2 ) * Math.PI,
       ease: Cubic.easeOut
     })
   }
@@ -74,6 +82,10 @@ class Pattern extends THREE.Group {
         this.elements[ i ].hide( true )
       }
     }
+  }
+
+  refreshColors() {
+    this.generator.refreshColors()
   }
 
 }

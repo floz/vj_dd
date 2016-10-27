@@ -3,18 +3,17 @@
 
 class ObjectPool{
 
-	constructor(create, minSize, maxSize){
+	constructor(create, size){
 		if( create ) {
-      this.init( create, minSize, maxSize )
+      this.init( create, size )
     }
 	}
 
-  init( create, minSize, maxSize ) {
+  init( create, size ) {
     this.create = create
-		this.minSize = minSize
-		this.maxSize = maxSize
+		this.size = size
 		this.list = []
-		for(let i = 0; i<minSize; i++){
+		for(let i = 0; i<size; i++){
 			this.add()
 		}
   }
@@ -33,9 +32,7 @@ class ObjectPool{
 	}
 
 	release( item ) {
-		if(this.list.length < this.maxSize){
-			this.list.push(item)
-		}
+		this.list.push(item)
 	}
 }
 

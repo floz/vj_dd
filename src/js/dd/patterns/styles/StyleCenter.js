@@ -1,6 +1,7 @@
 const BaseStyle = require( "./BaseStyle" )
 const PatternConfig = require( "../PatternConfig" )
-const SquareElement = require( "../elements/SquareElement" )
+// const SquareElement = require( "../elements/SquareElement" )
+const elementsPools = require( "../elements/elementsPools" )
 
 class StyleCenter extends BaseStyle {
 
@@ -15,7 +16,7 @@ class StyleCenter extends BaseStyle {
     const lum = 50
     const col = "hsl( " + hue + ", " + sat + "%, " + lum + "% )"
 
-    this.element = new SquareElement()
+    this.element = elementsPools.square.get()
     this.element.init( x, y, this.subdivisionCount, w, h, col )
     this.cnt.add( this.element )
   }
