@@ -13,9 +13,9 @@ class Audio {
 		this.levelsData = []
 		this.volumeHistory = []
 
-		this.BEAT_HOLD_TIME = 60
-		this.BEAT_DECAY_RATE = 0.98
-		this.BEAT_MIN = 0.12
+		this.BEAT_HOLD_TIME = 60 * 4
+		this.BEAT_DECAY_RATE = 0.2
+		this.BEAT_MIN = 8.5
 
 		this.globalVolume = 1
 		this.volume = 0

@@ -1,3 +1,4 @@
+const stage = require( "mnf/core/stage" )
 const stage3d = require( "mnf/core/stage3d" )
 const gui = require( "mnf/utils/gui" )
 
@@ -8,6 +9,9 @@ const styleFactory = require( "dd/patterns/styles/styleFactory" )
 const Floor = require( "dd/scene/Floor" )
 
 const timeout = require( "mnf/utils/timeout" )
+const keyboard = require( "mnf/utils/keyboard" )
+
+const audio = require( "mnf/core/audio" )
 
 class DD {
 
@@ -16,28 +20,34 @@ class DD {
 
     stage3d.initPostProcessing()
 
-    // const bloomPass = new WAGNER.MultiPassBloomPass(512,512)
-    // bloomPass.params.applyZoomBlur = false;
-    // bloomPass.params.blurAmount = .9;
-    // stage3d.addPass(bloomPass)
-    // const bloomgui = gui.addFolder('bloom')
-    // bloomgui.add(bloomPass.blendPass.params,'opacity', 0, 1)
-    // bloomgui.add(bloomPass.blendPass.params,'mode', 0, 23, 1)
-    // bloomgui.add(bloomPass.params,'applyZoomBlur')
-    // bloomgui.add(bloomPass.params,'zoomBlurStrength',0,1)
-    // bloomgui.add(bloomPass.params,'blurAmount',0,1)
-    // const bloomPass2 = new WAGNER.MultiPassBloomPass(256,256)
-    // bloomPass2.params.applyZoomBlur = true;
-    // bloomPass2.params.zoomBlurStrength = .1;
-    // bloomPass2.params.blurAmount = 1;
-    // stage3d.addPass(bloomPass2)
-    // const bloom2gui = gui.addFolder('bloom2')
-    // bloom2gui.add(bloomPass2.blendPass.params,'opacity', 0, 1)
-    // bloom2gui.add(bloomPass2.blendPass.params,'mode', 0, 23, 1)
-    // bloom2gui.add(bloomPass2.params,'applyZoomBlur')
-    // bloom2gui.add(bloomPass2.params,'zoomBlurStrength',0,1)
-    // bloom2gui.add(bloomPass2.params,'blurAmount',0,1)
+    this.volumeMax = 10
+
+    this.bloomPass = new WAGNER.MultiPassBloomPass(512,512)
+    this.bloomPass.params.applyZoomBlur = false;
+    this.bloomPass.params.blurAmount = .9;
+    this.bloomPass.params.opacity = .7;
+    // stage3d.addPass(this.bloomPass)
+    const bloomgui = gui.addFolder('bloom')
+    bloomgui.add(this.bloomPass.blendPass.params,'opacity', 0, 1)
+    bloomgui.add(this.bloomPass.blendPass.params,'mode', 0, 23, 1)
+    bloomgui.add(this.bloomPass.params,'applyZoomBlur')
+    bloomgui.add(this.bloomPass.params,'zoomBlurStrength',0,1)
+    bloomgui.add(this.bloomPass.params,'blurAmount',0,1)
+    this.bloomPass2 = new WAGNER.MultiPassBloomPass(256,256)
+    this.bloomPass2.params.applyZoomBlur = true;
+    this.bloomPass2.params.zoomBlurStrength = .1;
+    this.bloomPass2.params.blurAmount = 1;
+    this.bloomPass2.params.opacity = .6;
+    // stage3d.addPass(this.bloomPass2)
+    const bloom2gui = gui.addFolder('bloom2')
+    bloom2gui.add(this.bloomPass2.blendPass.params,'opacity', 0, 1)
+    bloom2gui.add(this.bloomPass2.blendPass.params,'mode', 0, 23, 1)
+    bloom2gui.add(this.bloomPass2.params,'applyZoomBlur')
+    bloom2gui.add(this.bloomPass2.params,'zoomBlurStrength',0,1)
+    bloom2gui.add(this.bloomPass2.params,'blurAmount',0,1)
     // stage3d.addPass(new WAGNER.FXAAPass())
+
+    this.fxaa = new WAGNER.FXAAPass()
 
 		stage3d.addPass( this.postProcess = new PostProcessPass() )
 
@@ -121,6 +131,8 @@ class DD {
     // this.createTunnel()
     // this.createCentered()
 
+    this.patterns = []
+
     this.patternsPool = []
     for( let i = 0, n = 6; i < n; i++ ) {
       let pattern = new Pattern( 0, 0, 400, 400 )
@@ -128,7 +140,11 @@ class DD {
     }
 
     timeout( () => {
-      this.createSerie()
+      // this.createSerie()
+      this.switchToSolo()
+      // this.createTower()
+      // this.createFive()
+      // this.createCube()
     }, 200 )
 
     this.floor = new Floor()
@@ -156,10 +172,199 @@ class DD {
     fContainerPatterns.add( this.containerPatterns.rotation, "y", -Math.PI, Math.PI )
     fContainerPatterns.add( this.containerPatterns.rotation, "z", -Math.PI, Math.PI )
     // fContainerPatterns.open()
+
+    this.zStep = 1
+    this.isColorRefreshingByVolume = true
+
+    audio.start()
+    audio.onBeat.add( this.onBeat )
+
+    stage.onUpdate.add( this.onUpdate )
+
+    this.canRefreshByVolume = true
+    this.checkRefreshByVolume()
+
+    keyboard.onDown.add( this.onKeyboardDown )
+  }
+
+  onKeyboardDown = ( key ) => {
+    if( key == 65 ) { // a
+      this.isColorRefreshingByVolume = !this.isColorRefreshingByVolume
+    }
+    else if ( key == 32 ) { // space
+      this.sceneHUE = Math.random() * 360 >> 0
+      this.updateSceneColor()
+    }
+    else if ( key == 80 ) { // p
+      this.prepareGlitchSwitch()
+      timeout( () => {
+        this.createSerie()
+      }, 200 )
+    }
+    else if ( key == 49 ) { // 1 !
+      stage3d.control.radius = stage3d.control._radius = 1200
+      stage3d.control._phi = Math.PI * .5
+			stage3d.control._theta = Math.PI * .5
+      this.container.position.x = 0
+      this.container.position.y = 0
+      this.container.position.z = 0
+      this.postProcess.params.mirrorX = false
+      this.postProcess.params.mirrorY = false
+      this.postProcess.params.sectionsKaleid = 0
+    }
+    else if ( key == 50 ) { // 2 @
+      stage3d.control.radius = stage3d.control._radius = 1200
+      stage3d.control._phi = Math.PI * .8
+			stage3d.control._theta = Math.PI * .5
+      this.container.position.x = 0
+      this.container.position.y = -100
+      this.container.position.z = 0
+      this.postProcess.params.mirrorX = false
+      this.postProcess.params.mirrorY = false
+      // this.postProcess.params.sectionsKaleid = 0
+    }
+    else if ( key == 51 ) { // 3
+      stage3d.control._phi = Math.PI * .8
+			stage3d.control._theta = Math.PI * .5
+      stage3d.control.radius = stage3d.control._radius = 800
+      this.container.position.x = 0
+      this.container.position.y = -100
+      this.container.position.z = 0
+      this.postProcess.params.mirrorX = true
+      this.postProcess.params.mirrorY = true
+      // this.postProcess.params.sectionsKaleid = 0
+    }
+    else if ( key == 52 ) { // 4
+      stage3d.control.radius = stage3d.control._radius = 1200
+      stage3d.control._phi = Math.PI * .8
+			stage3d.control._theta = Math.PI * .5
+      this.container.position.x = 0
+      this.container.position.y = -100
+      this.container.position.z = 0
+      this.postProcess.params.mirrorX = true
+      this.postProcess.params.mirrorY = false
+      // this.postProcess.params.sectionsKaleid = 0
+    }
+    else if ( key == 53 ) { // 5
+      stage3d.control.radius = stage3d.control._radius = 600
+      stage3d.control._phi = Math.PI * .5
+			stage3d.control._theta = Math.PI * .5
+      this.container.position.x = 0
+      this.container.position.y = 0
+      this.container.position.z = 0
+      this.postProcess.params.mirrorX = true
+      this.postProcess.params.mirrorY = false
+      this.postProcess.params.sectionsKaleid = 4
+    }
+    else if ( key == 54 ) { // 6
+      stage3d.control.radius = stage3d.control._radius = 600
+      stage3d.control._phi = Math.PI * .5
+			stage3d.control._theta = Math.PI * .5
+      this.container.position.x = 0
+      this.container.position.y = 0
+      this.container.position.z = 0
+      this.postProcess.params.mirrorX = true
+      this.postProcess.params.mirrorY = false
+      this.postProcess.params.sectionsKaleid = 8
+    }
+    else if ( key == 55 ) {
+      if( !this.hasFXPass ) {
+        stage3d.addPassFirst(this.fxaa)
+        stage3d.addPassFirst(this.bloomPass2)
+        stage3d.addPassFirst(this.bloomPass)
+        this.hasFXPass = true
+        this.postProcess.params.gamma = .16
+      } else {
+        stage3d.removePass(this.bloomPass)
+        stage3d.removePass(this.bloomPass2)
+        stage3d.removePass(this.fxaa)
+        this.hasFXPass = false
+        this.postProcess.params.gamma = .85
+      }
+    }
+    else if ( key == 57 ) { // 9
+      this.postProcess.params.mirrorX = !this.postProcess.params.mirrorX
+    }
+    else if ( key == 48 ) { // 0
+      this.postProcess.params.mirrorY = !this.postProcess.params.mirrorY
+    }
+    else if ( key == 81 ) { // q
+      if( !this.isTurned ) {
+        this.container.position.x = 34
+        this.container.rotation.set( .001, .001, 0.6697 )
+        this.isTurned = true
+      } else {
+        this.container.position.set( 0, 0, 0 )
+        this.container.rotation.set( .001, .001, 0.001 )
+        this.isTurned = false
+      }
+    }
+    else if ( key == 76 ) { // L
+      this.postProcess.params.glitchOffsetX = 2 + Math.random() * 10
+  		this.postProcess.params.glitchOffsetY = 2 + Math.random() * 10
+  		this.glitchRatio = 1
+      this.mode = "custom"
+    }
+    else if ( key == 75 ) { // K
+      this.postProcess.params.glitchOffsetX = 1 + Math.random() * 4
+  		this.postProcess.params.glitchOffsetY = 1 + Math.random() * 4
+  		this.glitchRatio = 1
+      this.mode = "custom"
+    }
+    else if ( key == 74 ) { // J
+      this.postProcess.params.glitchOffsetX = 2
+  		this.postProcess.params.glitchOffsetY = 2
+  		this.glitchRatio = .5
+      this.mode = "custom"
+    }
+    else if ( key == 72 ) { // H
+      this.postProcess.params.glitchOffsetX = 0
+  		this.postProcess.params.glitchOffsetY = 0
+  		this.glitchRatio = 0
+      this.mode = "custom"
+    }
+    else if ( key == 79 ) { // O
+      this.prepareGlitchSwitch()
+      timeout( () => {
+        this.createFive()
+      }, 400 )
+
+      this.mode = "five"
+      stage3d.control.radius = stage3d.control._radius = 1200
+    }
+    else if ( key == 73 ) { // I
+      this.prepareGlitchSwitch()
+      timeout( () => {
+        this.switchToSolo()
+      }, 400 )
+    }
+    else if ( key == 85 ) { // I
+      this.prepareGlitchSwitch()
+      timeout( () => {
+        this.createCube()
+      }, 400 )
+    }
+    else if ( key == 13 ) { //enter
+      this.refreshPatterns()
+    }
+    else if ( key == 77 ) { // m
+      for( let i = 0, n = this.patterns.length; i < n; i++ ) {
+        this.patterns[ i ].flip()
+      }
+    }
+  }
+
+  checkRefreshByVolume = () => {
+    timeout( () => {
+      this.canRefreshByVolume = true
+      this.checkRefreshByVolume()
+    }, Math.random() * 1500 + 500 )
   }
 
   updateSceneColor = () => {
-    colors.set( this.sceneHUE >> 0 )
+    this.sceneHUE >>= 0
+    this.sceneHUE = this.sceneHUE % 360
+    colors.set( this.sceneHUE )
 
     stage3d.scene.fog.color = colors.getFog()
     stage3d.renderer.setClearColor( stage3d.scene.fog.color )
@@ -193,19 +398,26 @@ class DD {
   }
 
   createTower() {
+    this.prepareSwitch()
+
     let pz = 0
     let size = 800
     let towerLength = 4
     let diffSize = 400
     let sizeStep = diffSize / towerLength
+
+    this.patterns = []
+
     for( let i = 0, n = towerLength; i < n; i++ ) {
-      let pattern = new Pattern( 0, 0, size, size, 4 )
+      let pattern = this.patternsPool[ i ]
       pattern.position.y = 75
       pattern.position.z = 100 + pz
       this.containerPatterns.add( pattern )
       if( i > 1 ) {
         pattern.disableShadows()
       }
+      pattern.show()
+      this.patterns.push( pattern )
 
       pz += 100
       size -= sizeStep
@@ -213,7 +425,14 @@ class DD {
   }
 
   createFive() {
-    const size = 200
+    this.prepareSwitch()
+
+    this.mode = "five"
+    stage3d.control.radius = stage3d.control._radius = 2000
+
+    this.fiveRadius = [ 1500, 2000, 2500 ]
+
+    const size = 600
     const pos = [
       [ 0, 0 ],
       [ -size, -size ],
@@ -222,19 +441,28 @@ class DD {
       [ size, size ]
     ]
 
+    this.patterns = []
+
     for( let i = 0, n = pos.length; i < n; i++ ) {
       let posCurr = pos[ i ]
 
-      let pattern = new Pattern( 0, 0, size, size )
+      let pattern = this.patternsPool[ i ]
       pattern.position.x = posCurr[ 0 ]
       pattern.position.y = posCurr[ 1 ]
       pattern.position.z = -50
-      pattern.disableShadows()
+      pattern.show()
+      // pattern.disableShadows()
       this.containerPatterns.add( pattern )
+
+      this.patterns.push( pattern )
     }
   }
 
   createElevation() {
+    this.prepareSwitch()
+
+    this.mode = "elevation"
+
     const data = [
       [ -300, 150, -50, 800 ],
       [ -200, -200, 50, 400 ],
@@ -244,18 +472,77 @@ class DD {
       [ -200, 200, 150, 200 ]
     ]
 
+    this.patterns = []
+
     for( let i = 0, n = data.length; i < n; i++ ) {
       let dataCurr = data[ i ]
 
-      let pattern = new Pattern( 0, 0, dataCurr[ 3 ], dataCurr[ 3 ] )
+      let pattern = this.patternsPool[ i ]
       pattern.position.x = dataCurr[ 0 ]
       pattern.position.y = dataCurr[ 1 ]
       pattern.position.z = dataCurr[ 2 ]
       if( i > 1 ) {
         pattern.disableShadows()
       }
+      pattern.show()
       this.containerPatterns.add( pattern )
+
+      this.patterns.push( pattern )
     }
+  }
+
+  createCube() {
+    this.prepareSwitch()
+
+    this.mode = "cube"
+
+    stage3d.control.radius = stage3d.control._radius = 2500
+
+    this.containerPatterns.position.z = 300
+    this.spotLight.position.z = 860
+    this.spotLight.intensity = .65
+
+    let pattern = this.patternsPool[ 0 ]
+    pattern.position.z = 200
+    pattern.show()
+    this.containerPatterns.add( pattern )
+    this.patterns.push( pattern )
+
+    pattern = this.patternsPool[ 1 ]
+    pattern.position.x = -300
+    pattern.rotation.y = -Math.PI * .25
+    pattern.show()
+    this.containerPatterns.add( pattern )
+    this.patterns.push( pattern )
+
+    pattern = this.patternsPool[ 2 ]
+    pattern.position.x = 300
+    pattern.rotation.y = Math.PI * .25
+    pattern.show()
+    this.containerPatterns.add( pattern )
+    this.patterns.push( pattern )
+
+    pattern = this.patternsPool[ 3 ]
+    pattern.position.y = 300
+    pattern.position.z = -100
+    pattern.rotation.x = -Math.PI * .25
+    pattern.show()
+    this.containerPatterns.add( pattern )
+    this.patterns.push( pattern )
+
+    // pattern = this.patternsPool[ 4 ]
+    // pattern.position.y = 200
+    // pattern.rotation.x = -Math.PI * .5
+    // pattern.show()
+    // this.containerPatterns.add( pattern )
+    // this.patterns.push( pattern )
+    //
+    pattern = this.patternsPool[ 4 ]
+    pattern.position.y = -300
+    pattern.rotation.x = Math.PI * .25
+    pattern.show()
+    this.containerPatterns.add( pattern )
+    this.patterns.push( pattern )
   }
 
   createTunnel() {
@@ -289,21 +576,18 @@ class DD {
   }
 
   createSerie() {
-    this.patterns = []
-    this.patternsSeriesData = [
-      [ 0, 0, -50, 400 ],
-      [ -400, 0, -50, 400 ],
-      [ 400, 0, -50, 400 ],
-      [ 0, 400, -50, 400 ],
-    ]
+    this.prepareSwitch()
 
-    this.patternSerieCnt.position.x = -this.patternsSeriesData[ 0 ][ 0 ]
+    this.mode = "serie"
+
+    this.patterns = []
+
+    this.patternSerieCnt.position.x = 0
+    this.patternSerieCnt.position.y = 0
+    this.patternSerieCnt.position.z = 0
     this.containerPatterns.add( this.patternSerieCnt )
 
     this.createSeriePattern()
-    // timeout( this.createSeriePattern, 1500 )
-    // timeout( this.createSeriePattern, 2800 )
-    // timeout( this.createSeriePattern, 4100 )
     timeout( this.firstSerieCreation, 1750 )
     timeout( this.lastSerieCreation, 3100 )
     timeout( this.serieMoveCamera, 3600 )
@@ -315,24 +599,26 @@ class DD {
     timeout( this.rotateSerie2, 8200 )
     timeout( this.separateSerie2, 9000 )
     timeout( this.regenerateAllSerie, 9400 )
+    timeout( this.prepareGlitchSwitch, 10700 )
     timeout( this.switchToSolo, 12000 )
   }
 
   createSeriePattern = () => {
     let idx = this.patterns.length
-    let data = this.patternsSeriesData[ idx ]
+
+    stage3d.control.radius = stage3d.control._radius = 1200
 
     let pattern = this.patternsPool[ 0 ]
-    pattern.position.x = data[ 0 ]
-    pattern.position.y = data[ 1 ]
-    pattern.position.z = data[ 2 ]
+    pattern.position.x = 0
+    pattern.position.y = 0
+    pattern.position.z = -50
     this.patternSerieCnt.add( pattern )
     pattern.show()
 
     this.patterns.push( pattern )
 
-    let newPosX = -data[ 0 ]
-    let newPosY = -data[ 1 ]
+    let newPosX = 0
+    let newPosY = 0
     timeout( () => {
       TweenLite.to( this.patternSerieCnt.position, .4, {
         x: newPosX,
@@ -524,25 +810,156 @@ class DD {
   }
 
   prepareSwitch() {
+    this.spotLight.position.z = 320
+    this.spotLight.intensity = .45
+
     for( let i = 0, n = this.patternsPool.length; i < n; i++ ) {
       let p = this.patternsPool[ i ]
+      p.position.set( 0, 0, 0 )
+      p.rotation.set( 0, 0, 0 )
       if( p.parent ) {
         p.parent.remove( p )
       }
     }
 
+    this.containerPatterns.position.set( 0, 0, 0 )
+    this.containerPatterns.rotation.set( 0, 0, 0 )
     while( this.containerPatterns.children.length ) {
       let c = this.containerPatterns.children.splice( 0, 1 )
       this.containerPatterns.remove( c )
     }
+  }
 
-    this.postProcess.params.glitchRatio = 2
+  prepareGlitchSwitch = () => {
+    this.mode = "switch"
     this.postProcess.params.glitchOffsetX = 2 + 5 * Math.random() >> 0
     this.postProcess.params.glitchOffsetY = 2 + 5 * Math.random() >> 0
   }
 
   switchToSolo = () => {
     this.prepareSwitch()
+
+    this.mode = "solo"
+
+    stage3d.control.radius = stage3d.control._radius = 1200
+    TweenLite.to( stage3d.control, 1, {
+      radius: 900,
+      ease: Cubic.easeOut
+    } )
+
+    this.patterns = []
+
+    let pattern = this.patternsPool[ 0 ]
+    pattern.position.x = 0
+    pattern.position.y = 0
+    this.containerPatterns.add( pattern )
+    pattern.flip()
+    this.patterns.push( pattern )
+
+    this.sceneHUE = 320
+    this.updateSceneColor()
+
+    this.postProcess.params.glitchRatio = .25
+    this.postProcess.params.glitchOffsetX = 2
+    this.postProcess.params.glitchOffsetY = 2
+
+    timeout( () => {
+      pattern.zStopToRefresh = 1
+      pattern.regenerate()
+    }, 400 )
+
+    // this.autoRefresh()
+  }
+
+  autoRefresh = () => {
+    timeout( () => {
+      let pattern = this.patterns[ 0 ]
+      if( Math.random() < .1 ) {
+        pattern.zStopToRefresh = 0
+      } else {
+        pattern.zStopToRefresh = 1 + Math.random() * 3 >> 0
+      }
+      pattern.regenerate()
+
+      // if( Math.random() < .5 ) {
+      //   pattern.flip()
+      // }
+      this.autoRefresh()
+    }, Math.random() * 1500 + 500 )
+  }
+
+  ///
+
+  onBeat = () => {
+    console.log( "beat" )
+    if( Math.random() < .5 ) {
+      for( let i = 0, n = this.patterns.length; i < n; i++ ) {
+        this.patterns[ i ].flip()
+      }
+    }
+
+    if( this.isColorRefreshingByVolume ) {
+      this.sceneHUE += Math.random() * 60
+      this.updateSceneColor()
+    }
+  }
+
+  onUpdate = () => {
+    if( audio.volume > this.volumeMax * .85  ) {
+      this.refreshByVolume()
+    }
+
+    if( this.mode == "five" && audio.volume > this.volumeMax * .75 ) {
+      stage3d.control.radius = stage3d.control._radius = this.fiveRadius[ this.fiveRadius.length * Math.random() >> 0 ]
+    }
+
+    // if( this.mode == "cube" && audio.volume > this.volumeMax * .7 ) {
+    //   this.containerPatterns.rotation.x = Math.PI * Math.random()
+    //   this.containerPatterns.rotation.y = Math.PI * Math.random()
+    // }
+
+    let ratioBase = 0
+    if( this.mode == "solo" || this.mode == "five" ) {
+      ratioBase = .25
+    } else if ( this.mode == "custom" ) {
+      ratioBase = this.glitchRatio
+    } else if ( this.mode == "switch" ) {
+      ratioBase = 4
+    } else {
+      ratioBase = .05
+    }
+    this.postProcess.params.glitchRatio = ratioBase * audio.volume / this.volumeMax
+
+    this.zStep = 1 + 60 * ( audio.volume / this.volumeMax )
+    this.refreshZStep()
+  }
+
+  refreshByVolume() {
+    if( !this.canRefreshByVolume ) {
+      return
+    }
+
+    this.refreshPatterns()
+  }
+
+  refreshPatterns() {
+    for( let i = 0, n = this.patterns.length; i < n; i++ ) {
+      let pattern = this.patterns[ i ]
+      if( Math.random() < .1 ) {
+        pattern.zStopToRefresh = 0
+      } else {
+        pattern.zStopToRefresh = 1 + Math.random() * 3 >> 0
+      }
+      pattern.regenerate()
+    }
+  }
+
+  refreshZStep() {
+    for( let i = 0, n = this.patterns.length; i < n; i++ ) {
+      let p = this.patterns[ i ]
+      p.zStep = this.zStep
+      p.refreshZStep()
+    }
   }
 
 }

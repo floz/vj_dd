@@ -95,6 +95,18 @@ class Stage3d{
 		this.passes.push(pass)
 	}
 
+	addPassFirst( pass ) {
+		this.passes.unshift( pass )
+	}
+
+	removePass = ( pass ) => {
+		let idx = this.passes.indexOf( pass )
+		if( idx > -1 ) {
+			console.log( idx )
+			this.passes.splice( idx, 1 )
+		}
+	}
+
 	render = (dt)=> {
 		this.renderer.autoClearColor = this.clearAuto
 		this.renderer.autoClear = this.clearAuto

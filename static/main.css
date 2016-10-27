@@ -19,6 +19,10 @@ html,body{
 	z-index: 999;
 }
 
+.dg.main {
+	display: none;
+}
+
 .name {
 	position: absolute;
 	top: 50%;

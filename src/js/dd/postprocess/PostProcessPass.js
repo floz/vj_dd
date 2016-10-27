@@ -12,7 +12,7 @@ class PostProcessPass extends WAGNER.Pass {
 		this.shader.uniforms.tInput.value.wrapS = THREE.RepeatWrapping
 		this.shader.uniforms.tInput.value.wrapT = THREE.RepeatWrapping
 
-		this.params.gamma = .85
+		this.params.gamma = .01
 		this.params.contrast = 1.15
 		this.params.brightness = -.08
 		this.params.angle = 0
