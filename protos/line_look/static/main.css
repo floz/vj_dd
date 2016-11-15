@@ -1,0 +1,158 @@
+
+* {
+	margin:0;
+	padding:0;
+}
+
+html,body{
+	position: relative;
+	overflow: hidden;
+	max-height: 100%;
+	height: 100%;
+	width: 100%;
+}
+
+.layer-mask {
+	position: absolute;
+	top: 0;
+	left: 0;
+	/*left: 50%;
+	top: 50%;*/
+	/*-webkit-transform: translate3d( -50%, -50%, 0 );
+	transform: translate3d( -50%, -50%, 0 );*/
+	background-image: url( imgs/mask.png );
+	/*width: 3429px;
+	height: 2097*/
+	width: 100%;
+	height: 100%;
+	background-size: cover;
+}
+
+.ui {
+	position: absolute;
+	pointer-events: none;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	font-family: Helvetica, Arial;
+	font-size: 16px;
+}
+
+.ui-part {
+	position: absolute;
+	left: 50%;
+	margin-left: -540px;
+}
+
+.ui-1 {
+	top: 30px;
+	color: #000;
+}
+
+.actions-top div {
+	position: absolute;
+	display: inline-block;
+}
+
+.actions-top-moins {
+	left: 150px;
+}
+
+.actions-top-desc {
+	left: 510px;
+}
+
+.actions-top-plus {
+	left: 930px;
+}
+
+.ui-1 .actions-top {
+	position: absolute;
+	top: 26px;
+}
+
+.actions-side div {
+	position: absolute;
+	display: inline-block;
+}
+
+.actions-side-moins {
+	left: -40px;
+	top: 20px;
+}
+
+.actions-side-desc {
+	left: -150px;
+	top: 60px;
+}
+
+.actions-side-plus {
+	left: -40px;
+	top: 100px;
+}
+
+.ui-1 .actions-side {
+	position: absolute;
+	top: 26px;
+}
+
+.ui-2 {
+	top: 210px;
+	color: #9c0006;
+}
+
+.ui-2 .actions-top {
+	position: absolute;
+	top: 20px;
+}
+
+.ui-2 .actions-side {
+	position: absolute;
+	top: 20px;
+}
+
+.ui-3 {
+	top: 380px;
+	color: #ded971;
+}
+
+.ui-3 .actions-top {
+	position: absolute;
+	top: 20px;
+}
+
+.ui-3 .actions-side {
+	position: absolute;
+	top: 20px;
+}
+
+.ui-4 {
+	top: 555px;
+	color: #eae2cb;
+}
+
+.ui-4 .actions-top {
+	position: absolute;
+	top: 20px;
+}
+
+.ui-4 .actions-side {
+	position: absolute;
+	top: 20px;
+}
+
+.ui-5 {
+	top: 726px;
+	color: #d1d1d3;
+}
+
+.ui-5 .actions-top {
+	position: absolute;
+	top: 20px;
+}
+
+.ui-5 .actions-side {
+	position: absolute;
+	top: 20px;
+}

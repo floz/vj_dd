@@ -1,4 +1,4 @@
-precision highp float;
+precision mediump float;
 
 float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -96,74 +96,56 @@ float snoise(vec3 v)
                                 dot(p2,x2), dot(p3,x3) ) );
 }
 
+float blendOverlay(float base, float blend) {
+	return base<0.5?(2.0*base*blend):(1.0-2.0*(1.0-base)*(1.0-blend));
+}
 
-uniform sampler2D tex;
-uniform sampler2D texIrr1;
-uniform sampler2D texIrr2;
-uniform sampler2D texNoise1;
-uniform sampler2D texNoise2;
-uniform vec3 color;
-uniform vec3 colorOpp;
-uniform float alpha;
-uniform float percentY;
+vec3 blendOverlay(vec3 base, vec3 blend) {
+	return vec3(blendOverlay(base.r,blend.r),blendOverlay(base.g,blend.g),blendOverlay(base.b,blend.b));
+}
+
+vec3 blendOverlay(vec3 base, vec3 blend, float opacity) {
+	return (blendOverlay(base, blend) * opacity + base * (1.0 - opacity));
+}
+
+vec3 blendMultiply(vec3 base, vec3 blend) {
+	return base*blend;
+}
+
+vec3 blendMultiply(vec3 base, vec3 blend, float opacity) {
+	return (blendMultiply(base, blend) * opacity + base * (1.0 - opacity));
+}
+
+
+uniform sampler2D texRelief;
+uniform sampler2D texDetails;
+uniform sampler2D texBrightness;
+uniform vec3 colorA;
+uniform vec3 colorB;
 uniform float time;
-uniform float texSize;
-uniform float texSizeNoise;
-uniform sampler2D tDisp;
-uniform float uID;
-uniform float luminosityStrength1;
-uniform float luminosityStrength2;
-uniform float luminosityStrengthNoise;
-uniform float brightness;
-uniform float vDispNoise;
-uniform float noise2Strength;
+uniform float speedFactor;
+uniform float brightnessFactor;
+uniform float flickeringFactor;
+uniform float texRepeatDetails;
+uniform float texRepeatBrightness;
 
 varying vec2 vUv;
-varying float vId;
-varying float vDisp;
-
-float exponentialOut(float t) {
-  return t == 1.0 ? t : 1.0 - pow(2.0, -10.0 * t);
-}
-
-float cubicOut(float t) {
-  float f = t - 1.0;
-  return f * f * f + 1.0;
-}
 
 void main() {
-	vec2 uv = vUv;
-	uv.x = cos( time * .01 + uv.x * texSize ) * texSize;
+	vec4 cRelief = texture2D( texRelief, vUv );
 
-  vec2 uv2 = vUv;
-  uv2.x = cos( time * .01 + uv2.x * texSize ) * texSize;
+	vec2 uvMovingDetails = vec2( vUv.x * texRepeatDetails + time * speedFactor, vUv.y );
+	vec4 cDetails = texture2D( texDetails, uvMovingDetails );
+	vec2 uvMovingBrightness = vec2( vUv.x * texRepeatBrightness + time * speedFactor, vUv.y );
+	vec4 cBrightness = texture2D( texBrightness, uvMovingBrightness );
 
-  vec2 uvnoise = vUv;
-  // uvnoise.x = mod( uvnoise.x + vDispNoise, 1. );// + time * .05;
-  uvnoise.x = uvnoise.x + time * .05;
+	vec3 cFinal = colorB * cRelief.r * cDetails.r;
+	cFinal += colorA * ( 1. - cRelief.r );
+	cFinal += colorA * ( 1. - cDetails.r );
+	cFinal = cFinal + cFinal * colorA * ( 1. - cBrightness.r ) * brightnessFactor;
+	cFinal += cFinal * ( snoise( vec3( vUv, rand( vUv ) ) ) ) * flickeringFactor;
+	// cFinal = blendMultiply( cFinal, vec3( 1. - ( snoise( vec3( vUv, rand( vUv ) ) ) ) ), .8 * flickeringFactor );
 
-	vec3 disp = texture2D( tDisp, vec2( vUv.x * .5, percentY ) ).rgb;
-
-	vec3 newColor = color * ( 1. - disp.r ) + colorOpp * disp.r;
-	// vec3 newColor = color;
-
-	vec4 result = vec4( newColor, alpha * cubicOut( 1. - vUv.y ) );
-	// vec4 result = vec4( newColor, 1. );
-	result *= texture2D( tex, vUv );
-
-  vec3 rgb = result.rgb;
-  // result.rgb += rgb * vec3( cos( vUv.x * 200. + time * 2. ) ) * .1;
-
-  // result.rgb = vec3( 1., 0., 1. ) * ( disp.b );
-  // result.rgb += brightness * abs( max( 0., disp.b ) * ( rgb * luminosityStrength1 ) * texture2D( texIrr1, vec2( uv2.x * 5., uv.y ) ).r * sin( time * 5. ) );
-  result.rgb += brightness * abs( max( 0., min( disp.b, .8 ) ) * ( rgb * luminosityStrength2 ) * texture2D( texIrr2, vec2( uv2.x * 5., uv.y ) ).r * ( 1. - sin( time * 5. ) ) );
-  result.rgb += brightness * snoise( vec3( uv2, rand( uv2 ) ) ) * rgb * noise2Strength;
-  // result.rgb += rgb * texture2D( texIrr1, vec2( uv.x * 10., uv.y ) ).r * sin( time * .001 );
-
-  // result.rgba = texture2D( texNoise1, vec2( vUv.x * 10., vUv.y * 2. ) ).rgba;
-  // result.rgb += brightness * abs( rgb * luminosityStrengthNoise * texture2D( texNoise2, vec2( uv.x * texSizeNoise, uv.y * 1. ) ).r * 4. );
-  result.rgb += brightness * abs( rgb * luminosityStrengthNoise * texture2D( texNoise2, vec2( uvnoise.x * texSizeNoise, uvnoise.y ) ).r );
-
-	gl_FragColor = result;
+	gl_FragColor = vec4( cFinal, 1. );
 
 }

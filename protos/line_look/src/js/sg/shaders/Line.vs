@@ -19,11 +19,9 @@ uniform float strx;
 uniform float stry;
 uniform sampler2D tDisp;
 uniform float time;
-uniform float speedEffect;
-uniform float speedEffect2;
 
 varying vec2 vUv;
-// varying float vId;
+varying float vId;
 varying float vDisp;
 
 vec2 fix( vec4 i, float aspect ) {
@@ -34,11 +32,11 @@ vec2 fix( vec4 i, float aspect ) {
 
 void main() {
 	vUv = uv;
-	// vId = id;
+	vId = id;
 
-	vec3 dispPrevious = texture2D( tDisp, vec2( uv.x * .5 - stepX, percentY ) ).rgb;
-	vec3 dispCurr = texture2D( tDisp, vec2( uv.x * .5, percentY ) ).rgb;
-	vec3 dispNext = texture2D( tDisp, vec2( uv.x * .5 + stepX, percentY ) ).rgb;
+	vec3 dispPrevious = texture2D( tDisp, vec2( uv.x - stepX, percentY ) ).rgb;
+	vec3 dispCurr = texture2D( tDisp, vec2( uv.x, percentY ) ).rgb;
+	vec3 dispNext = texture2D( tDisp, vec2( uv.x + stepX, percentY ) ).rgb;
 
 	float aspect = resolution.x / resolution.y;
 	float pixelWidthRatio = 1. / (resolution.x * projectionMatrix[0][0]);
@@ -52,19 +50,15 @@ void main() {
 	float spacialStrCurr = 1. - distance( vec2( .5, .5 ), vec2( uv.x, percentY ) ) * 1.6;
 	float spacialStrNext = 1. - distance( vec2( .5, .5 ), vec2( ( uv.x + stepX ), percentY ) ) * 1.6;
 
-	finalPosition.x += dispCurr.g * strx * spacialStrCurr * speedEffect;
-	prevPos.x += dispPrevious.g * strx * spacialStrPrev * speedEffect;
-	nextPos.x += dispNext.g * strx * spacialStrNext * speedEffect;
+	finalPosition.x += dispCurr.g * strx * spacialStrCurr;
+	prevPos.x += dispPrevious.g * strx * spacialStrPrev;
+	nextPos.x += dispNext.g * strx * spacialStrNext;
 
-	// finalPosition.z += dispCurr.b * stry * spacialStrCurr * speedEffect * .5;// * sin( time * .25 + vUv.x );
-	// prevPos.z += dispPrevious.b * stry * spacialStrPrev * speedEffect * .5;// * sin( time * .25 + vUv.x );
-	// nextPos.z += dispNext.b * stry * spacialStrNext * speedEffect * .5;// * sin( time * .25 + vUv.x );
+	finalPosition.y += dispCurr.b * stry * spacialStrCurr;// * sin( time * .25 + vUv.x );
+	prevPos.y += dispPrevious.b * stry * spacialStrPrev;// * sin( time * .25 + vUv.x );
+	nextPos.y += dispNext.b * stry * spacialStrNext;// * sin( time * .25 + vUv.x );
 
-	finalPosition.y += dispCurr.b * stry * spacialStrCurr * speedEffect * speedEffect2;// * sin( time * .25 + vUv.x );
-	prevPos.y += dispPrevious.b * stry * spacialStrPrev * speedEffect * speedEffect2;// * sin( time * .25 + vUv.x );
-	nextPos.y += dispNext.b * stry * spacialStrNext * speedEffect * speedEffect2;// * sin( time * .25 + vUv.x );
-
-	vDisp = dispCurr.b * stry * spacialStrPrev * speedEffect;
+	vDisp = dispCurr.b * stry * spacialStrPrev;
 
 	// finalPosition.z += dispCurr.r * stry * spacialStrCurr;
 	// prevPos.z += dispPrevious.r * stry * spacialStrPrev;
@@ -80,19 +74,15 @@ void main() {
 	// w *= smoothstep(uv.x,0.,-time*2000.);
 	// w *= ( 1. - smoothstep( .3, 1., uv.x * 1. ) );
 
-	// vec2 dir;
-	// if( nextP == currentP ) dir = normalize( currentP - prevP );
-	// else if( prevP == currentP ) dir = normalize( nextP - currentP );
-	// else {
-	// 	vec2 dir1 = normalize( currentP - prevP );
-	// 	vec2 dir2 = normalize( nextP - currentP );
-	// 	dir = normalize( dir1 + dir2 );
-	// }
-	// vec2 normal = vec2( -dir.y, dir.x );
-	// normal.x /= aspect;
-	// normal *= .5 * w;
-
-	vec2 normal = vec2( 0., 1. );
+	vec2 dir;
+	if( nextP == currentP ) dir = normalize( currentP - prevP );
+	else if( prevP == currentP ) dir = normalize( nextP - currentP );
+	else {
+		vec2 dir1 = normalize( currentP - prevP );
+		vec2 dir2 = normalize( nextP - currentP );
+		dir = normalize( dir1 + dir2 );
+	}
+	vec2 normal = vec2( -dir.y, dir.x );
 	normal.x /= aspect;
 	normal *= .5 * w;
 
